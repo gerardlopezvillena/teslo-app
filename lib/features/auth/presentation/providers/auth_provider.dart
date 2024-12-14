@@ -40,22 +40,20 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepositoryDomain authRepository;
   AuthNotifier({required this.authRepository}) : super(AuthState());
-  Future<void>loginUser(String email, String password) async {
+  Future<void> loginUser(String email, String password) async {
     try {
       final user = await authRepository.login(email, password);
       _setLoggedUser(user);
-    } on WrongCredentials {
-      logout('Les credencials no són correctes');
-    } catch (e){
+    } on CustomError catch (e) {
+      logout(e.message);
+    } catch (e) {
       logout('Error d\'accès no controlat');
     }
-    
-  }
-  registerUser(String email, String password, String fullName) async {
   }
 
-  checkAuthStatus() async {
-  }
+  registerUser(String email, String password, String fullName) async {}
+
+  checkAuthStatus() async {}
 
   _setLoggedUser(User user) async {
     // TODO: Cal guardar TOKEN físicament
@@ -65,7 +63,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  Future<void>logout([String? errorMessage]) async {
+  Future<void> logout([String? errorMessage]) async {
     // TODO: Netejar TOKEN
     state = state.copyWith(
       user: null,

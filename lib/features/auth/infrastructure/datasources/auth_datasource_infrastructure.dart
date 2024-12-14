@@ -23,8 +23,17 @@ class AuthDatasourceInfrastructure extends AuthDatasourceDomain {
       });
       final user = UserMapper.userJsonToEntity(response.data);
       return user;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw CustomError(
+            e.response?.data['message'] ?? 'Credencials Incorrectes');
+      }
+      if (e.type == DioExceptionType.connectionTimeout) {
+        throw CustomError('Error de connexio');
+      }
+      throw Exception();
     } catch (e) {
-      throw WrongCredentials();
+      throw Exception();
     }
   }
 
